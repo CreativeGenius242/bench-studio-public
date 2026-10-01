@@ -1310,6 +1310,27 @@ function extractUrls(result) {
   return urls;
 }
 
+// Serve the compiled Bench Studio web interface in production.
+const WEB_DIST = resolve(HERE, "..", "dist");
+
+if (existsSync(WEB_DIST)) {
+  app.use(express.static(WEB_DIST));
+
+  app.get("*", (req, res, next) => {
+    if (
+      req.path.startsWith("/api/") ||
+      req.path.startsWith("/media/") ||
+      req.path.startsWith("/previews/") ||
+      req.path.startsWith("/inputs/") ||
+      req.path.startsWith("/projects/")
+    ) {
+      return next();
+    }
+
+    res.sendFile(join(WEB_DIST, "index.html"));
+  });
+}
+
 const PORT = process.env.PORT || 8787;
 
 // Start serving immediately. Price discovery is useful, but it should never
